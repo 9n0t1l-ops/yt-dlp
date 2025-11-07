@@ -1,8 +1,10 @@
-# YouTube Live Chat Downloader - Browser Extension
+# YouTube Tools - Browser Extension
 
-A browser extension that downloads YouTube live chat messages using your browser's cookies, mimicking the functionality of `yt-dlp --write-subs --sub-lang "live_chat"`.
+A browser extension that provides YouTube utilities using your browser's cookies, mimicking yt-dlp functionality.
 
 ## Features
+
+### Live Chat Downloader
 
 - **Download Live Chat Replay**: Download archived chat from finished live streams
 - **Download Live Chat**: Download chat messages from ongoing live streams (continues until stopped)
@@ -10,15 +12,24 @@ A browser extension that downloads YouTube live chat messages using your browser
 - **yt-dlp Compatible**: Follows the same implementation logic as yt-dlp's `YoutubeLiveChatFD` downloader
 - **Same Output Format**: Generates `.live_chat.json` files in the same format as yt-dlp
 
+### Channel Live Stream Fetcher (NEW)
+
+- **Fetch All Live Videos**: Get all live, upcoming, and archived live stream videos from a YouTube channel
+- **Video Status Detection**: Automatically identifies videos that are currently live, upcoming, or past live streams
+- **Statistics**: Shows counts for live, upcoming, and past live streams
+- **Export Options**: Copy all video IDs or export complete data as JSON
+- **Quick Access**: Click video titles to open them in new tabs
+
 ## Implementation Details
 
 This extension closely mimics the implementation of yt-dlp's live chat downloader:
 
 ### Architecture
 
-1. **Content Script** (`content.js`): Runs on YouTube pages, extracts page data, and handles the download logic
+1. **Content Script** (`content.js`): Runs on video watch pages, extracts page data, and handles the live chat download logic
 2. **Background Script** (`background.js`): Manages state and coordinates file downloads
-3. **Popup UI** (`popup.html`, `popup.js`): Provides user interface for controlling downloads
+3. **Popup UI** (`popup.html`, `popup.js`): Provides user interface with tabs for live chat downloading and channel live stream listing
+4. **Channel Content Script** (`channel-content.js`): Runs on channel pages (`/@handle`), fetches live stream metadata using logged-in cookies
 
 ### Key Features Mimicked from yt-dlp
 
@@ -69,6 +80,8 @@ yt-dlp --cookies www.youtube.com_cookies.txt --skip-download --write-subs --sub-
 
 ## Usage
 
+### Live Chat Downloader
+
 1. **Navigate to a YouTube video** with live chat (either live or replay available)
 2. **Click the extension icon** in your browser toolbar
 3. **Choose download type**:
@@ -78,7 +91,22 @@ yt-dlp --cookies www.youtube.com_cookies.txt --skip-download --write-subs --sub-
 
 The extension will download the chat and save it as `VIDEO_ID.live_chat.json` in the same format as yt-dlp.
 
-## Output Format
+### Channel Live Stream Fetcher
+
+1. **Navigate to a YouTube channel page** (e.g., `https://www.youtube.com/@channelname`)
+2. **Click the extension icon** in your browser toolbar - it will automatically switch to the "Channel Live Streams" tab
+3. **Click "Fetch All Live Videos"** to retrieve the list
+4. **Use the results**:
+   - Click on video titles to open them in new tabs
+   - Click "Copy" next to any video ID to copy it
+   - Click "Copy All Video IDs" to copy all IDs (one per line)
+   - Click "Export as JSON" to download complete metadata
+
+For detailed Chinese documentation, see [README-CHANNEL-LIVES-ZH.md](README-CHANNEL-LIVES-ZH.md).
+
+## Output Formats
+
+### Live Chat Downloader
 
 The output file format is identical to yt-dlp's live chat format:
 - Newline-delimited JSON
@@ -92,6 +120,43 @@ Example:
 ...
 ```
 
+### Channel Live Stream Fetcher
+
+Two output options are available:
+
+- **Copy All Video IDs**: Plain text with one video ID per line (suitable for piping into yt-dlp)
+- **Export as JSON**: Structured JSON containing channel metadata, per-video details, and aggregate statistics
+
+Example JSON export:
+```json
+{
+  "channel": {
+    "id": "CHANNEL_ID",
+    "title": "Channel Name",
+    "description": "...",
+    "url": "https://www.youtube.com/channel/CHANNEL_ID",
+    "subscriberCountText": "1.23M subscribers"
+  },
+  "videos": [
+    {
+      "videoId": "VIDEO_ID",
+      "title": "Live Stream Title",
+      "url": "https://www.youtube.com/watch?v=VIDEO_ID",
+      "isLive": true,
+      "isUpcoming": false,
+      "viewCountText": "123K views",
+      "publishedTimeText": "Streamed 2 days ago",
+      "scheduledStartTime": "2024-01-01T12:00:00.000Z",
+      "thumbnails": [...]
+    }
+  ],
+  "totalCount": 10,
+  "liveCount": 2,
+  "upcomingCount": 1,
+  "exportedAt": "2024-01-05T08:30:00.000Z"
+}
+```
+
 ## Technical Requirements
 
 - Chromium-based browser (Chrome, Edge, Brave, Opera, Vivaldi) or Firefox
@@ -102,22 +167,22 @@ Example:
 
 The extension requires the following permissions:
 
-- `cookies`: To access YouTube cookies for authentication
 - `activeTab`: To interact with the current YouTube tab
-- `scripting`: To inject content scripts
-- `downloads`: To save the chat file
-- `https://www.youtube.com/*`: To access YouTube pages
+- `downloads`: To save chat files and JSON exports
+- `https://www.youtube.com/*`: To access YouTube pages and extract data
 
 ## Code Structure
 
 ```
 browser-extension/
-├── manifest.json          # Extension manifest (Manifest V3)
-├── popup.html            # Extension popup UI
-├── popup.js              # Popup logic and UI handling
-├── background.js         # Service worker for managing state
-├── content.js            # Core download logic (mimics yt-dlp)
-└── README.md             # This file
+├── manifest.json            # Extension manifest (Manifest V3)
+├── popup.html              # Extension popup UI with tabbed tools
+├── popup.js                # Popup logic for live chat + channel live streams
+├── background.js           # Service worker for managing downloads
+├── content.js              # Live chat download logic (mimics yt-dlp)
+├── channel-content.js      # Channel page logic for fetching live streams
+├── README.md               # English documentation (this file)
+└── README-CHANNEL-LIVES-ZH.md # Chinese documentation focused on live stream IDs
 ```
 
 ## Comparison with yt-dlp
@@ -127,7 +192,8 @@ browser-extension/
 | Cookie handling | File-based (`--cookies`) | Browser cookies (automatic) |
 | Live chat replay | ✅ | ✅ |
 | Live chat (live) | ✅ | ✅ |
-| Output format | `.live_chat.json` | `.live_chat.json` (identical) |
+| Live chat output format | `.live_chat.json` | `.live_chat.json` (identical) |
+| Channel live stream listing | Manual scripting required | ✅ Built-in UI |
 | SAPISIDHASH auth | ✅ | ✅ |
 | Continuation parsing | ✅ | ✅ |
 | API compatibility | ✅ | ✅ |
@@ -135,20 +201,43 @@ browser-extension/
 
 ## Troubleshooting
 
-### "No live chat available for this video"
+### Live Chat Downloader
+
+#### "No live chat available for this video"
 - The video must have live chat enabled
 - For replays, the stream must be finished
 - Some videos don't have chat (disabled by uploader)
 
-### "Failed to extract YouTube configuration"
+#### "Failed to extract YouTube configuration"
 - Try refreshing the YouTube page
 - Make sure you're on a video page (`/watch?v=...`)
 - Check browser console for detailed errors
 
-### "YouTube API request failed"
+#### "YouTube API request failed"
 - Your cookies might have expired - try reloading YouTube
 - Network issues - check your connection
 - YouTube might have rate-limited requests
+
+### Channel Live Stream Fetcher
+
+#### "Navigate to a YouTube channel page"
+- Ensure you are on a channel page with URL format: `https://www.youtube.com/@channelname`
+- Don't use video watch pages or other YouTube pages
+
+#### "Failed to fetch streams page"
+- Check your network connection
+- Make sure you are logged into YouTube
+- Try refreshing the page and clicking the extension again
+
+#### "Unable to extract channel data"
+- YouTube page structure may have changed
+- Try refreshing the page
+- Check browser console for detailed errors
+
+#### "No live videos found"
+- The channel may not have any live stream videos
+- Ensure the channel has created live streams (past, upcoming, or current)
+- Some channels may restrict access to their live stream lists
 
 ## Development
 

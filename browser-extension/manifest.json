@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "YouTube Live Chat Downloader",
-  "version": "1.0.0",
-  "description": "Download YouTube live chat messages using browser cookies, mimicking yt-dlp functionality",
+  "name": "YouTube Tools",
+  "version": "1.1.0",
+  "description": "Download YouTube live chat messages and fetch channel live stream IDs using browser cookies, mimicking yt-dlp functionality",
   "permissions": [
     "activeTab",
     "downloads"
@@ -16,12 +16,21 @@
   },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Download YouTube live chat"
+    "default_title": "YouTube Tools"
   },
   "content_scripts": [
     {
       "matches": ["https://www.youtube.com/watch*"],
       "js": ["content.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.youtube.com/@*",
+        "https://www.youtube.com/channel/*",
+        "https://www.youtube.com/user/*"
+      ],
+      "js": ["channel-content.js"],
       "run_at": "document_idle"
     }
   ]

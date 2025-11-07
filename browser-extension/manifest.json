@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Live Chat Downloader",
+  "version": "1.0.0",
+  "description": "Download YouTube live chat messages using browser cookies, mimicking yt-dlp functionality",
+  "permissions": [
+    "activeTab",
+    "downloads"
+  ],
+  "host_permissions": [
+    "https://www.youtube.com/*",
+    "https://music.youtube.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Download YouTube live chat"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/watch*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

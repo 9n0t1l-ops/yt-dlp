@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>YouTube Live Chat Downloader</title>
+  <style>
+    body {
+      width: 350px;
+      padding: 15px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+    }
+    h1 {
+      font-size: 16px;
+      margin: 0 0 15px 0;
+      color: #030303;
+    }
+    .section {
+      margin-bottom: 15px;
+    }
+    .info {
+      font-size: 13px;
+      color: #606060;
+      margin-bottom: 10px;
+    }
+    .button-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    button {
+      padding: 10px 15px;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+      background-color: #065fd4;
+      color: white;
+      font-weight: 500;
+    }
+    button:hover {
+      background-color: #0553c2;
+    }
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    #status {
+      font-size: 12px;
+      color: #606060;
+      margin-top: 10px;
+      padding: 8px;
+      border-radius: 4px;
+      display: none;
+    }
+    #status.success {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+      display: block;
+    }
+    #status.error {
+      background-color: #ffebee;
+      color: #c62828;
+      display: block;
+    }
+    #status.info {
+      background-color: #e3f2fd;
+      color: #1565c0;
+      display: block;
+    }
+    .progress {
+      font-size: 12px;
+      margin-top: 5px;
+    }
+    .warning {
+      font-size: 12px;
+      color: #d93025;
+      margin-bottom: 10px;
+      padding: 8px;
+      background-color: #fef7e0;
+      border-radius: 4px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>📥 YouTube Live Chat Downloader</h1>
+  
+  <div class="section">
+    <div class="info">
+      Download live chat from YouTube videos using your browser's cookies (mimics yt-dlp --write-subs --sub-lang "live_chat").
+    </div>
+  </div>
+
+  <div class="warning" id="warning"></div>
+
+  <div class="button-container">
+    <button id="downloadLiveChat">Download Live Chat (Replay)</button>
+    <button id="downloadLiveChatLive" style="display:none;">Download Live Chat (Live)</button>
+    <button id="stopDownload" style="display:none;background-color:#d93025;">Stop Download</button>
+  </div>
+
+  <div id="status"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
